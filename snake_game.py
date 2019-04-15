@@ -1,3 +1,4 @@
+import random
 import time
 import turtle
 
@@ -20,7 +21,15 @@ if __name__ == "__main__":
     head.color("white")
     head.penup()
     head.goto(0,0)
-    head.direction = ""
+    head.direction = "stop"
+
+    #Snake food
+    food = turtle.Turtle()
+    food.speed(0)
+    food.shape("square")
+    food.color("red")
+    food.penup()
+    food.goto(0,100)
 
     # Functions
     def move():
@@ -63,8 +72,15 @@ if __name__ == "__main__":
 
     # Main game loop
     while True:
-        time.sleep(delay)
-        move()
         window.update()
+
+        if head.distance(food) < 20:
+            #Move the food randomly
+            x = random.randint(-290,290)
+            y = random.randint(-290, 290)
+            food.goto(x,y)
+
+        move()
+        time.sleep(delay)
 
     window.mainloop()
