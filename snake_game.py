@@ -1,11 +1,21 @@
+import _thread
+import os
+import pickle
 import random
 import time
 import turtle
 
 if __name__ == "__main__":
 
+    os.getcwd()
+
+    try:
+        highScore = pickle.load(open("highscore.txt", "rb"))
+    except (OSError, IOError) as e:
+        highScore = 0
+
+
     delay = 0.1
-    highScore = 0
     score = 0
 
     # Set up the screen
@@ -14,13 +24,20 @@ if __name__ == "__main__":
     window.bgcolor("purple")
     window.setup(width=1000, height=700)
     window.tracer(0)
+    image = "python.gif"
+    if os.path.isfile(image):
+        window.addshape(image)
+
 
 
     # Snake head
     head = turtle.Turtle()
+    if os.path.isfile(image):
+        head.shape(image)
+    else:
+        head.shape("square")
+        head.color("white")
     head.speed(0)
-    head.shape("square")
-    head.color("white")
     head.penup()
     head.goto(0,0)
     head.direction = "stop"
@@ -32,6 +49,14 @@ if __name__ == "__main__":
     food.color("red")
     food.penup()
     food.goto(0,100)
+
+    # Snake food
+    extraFood = turtle.Turtle()
+    extraFood.speed(0)
+    extraFood.shape("triangle")
+    extraFood.color("green")
+    extraFood.penup()
+    extraFood.goto(0, 100)
 
     bodies = []
 
@@ -66,6 +91,9 @@ if __name__ == "__main__":
 
         score = 0
         changeLetters(score,highScore)
+
+        #save highScore into a file
+        pickle.dump(highScore, open("highscore.txt", "wb"))
 
         return score
 
@@ -107,10 +135,10 @@ if __name__ == "__main__":
 
     # Keyboard Bindings
     window.listen()
-    window.onkeypress(go_up, 'w')
-    window.onkeypress(go_down, 's')
-    window.onkeypress(go_left, 'a')
-    window.onkeypress(go_right, 'd')
+    window.onkeypress(go_up, 'Up')
+    window.onkeypress(go_down, 'Down')
+    window.onkeypress(go_left, 'Left')
+    window.onkeypress(go_right, 'Right')
 
 
     # Main game loop
@@ -140,7 +168,7 @@ if __name__ == "__main__":
             new_body = turtle.Turtle()
             new_body.speed(0)
             new_body.shape("square")
-            new_body.color("green")
+            new_body.color("yellow")
             new_body.penup()
             bodies.append(new_body)
 
@@ -150,7 +178,40 @@ if __name__ == "__main__":
 
             changeLetters(score,highScore)
 
-            delay -=0.002
+            if delay>=0.03:
+                delay -=0.002
+
+        # snake touches extrafood
+        if head.distance(extraFood) < 20:
+
+            # Add 3 bodies
+            new_body = turtle.Turtle()
+            new_body.speed(0)
+            new_body.shape("square")
+            new_body.color("yellow")
+            new_body.penup()
+            bodies.append(new_body)
+            bodies.append(new_body)
+            bodies.append(new_body)
+
+            score = score + 30
+            if score > highScore:
+                highScore = score
+
+            changeLetters(score, highScore)
+
+            # Move the food randomly
+            extraFood.goto((2000, 2000))
+            x = random.randint(-430, 430)
+            y = random.randint(-330, 330)
+            extraFood.goto(x,y)
+            # try:
+            #     _thread.start_new_thread(extra_food_goto, (x, y,))
+            # except:
+            #     print("Error: unable to start thread")
+
+            if delay >= 0.03:
+                delay -= 0.006
 
 
         for i in range(len(bodies)-1, 0 , -1):
